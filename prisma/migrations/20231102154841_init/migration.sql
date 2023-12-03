@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CoinHistory" ALTER COLUMN "date" SET DATA TYPE BIGINT;

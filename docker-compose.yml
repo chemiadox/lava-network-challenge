@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  cryptotracker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - database_url=postgresql://ctuser:ctpass123@postgres:5432/ct?schema=public
+    container_name: cryptotracker
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    environment:
+      - DRAGONFLY_HOST=dragonfly
+      - DATABASE_URL=postgresql://ctuser:ctpass123@postgres:5432/ct?schema=public
+    networks:
+      - internal_network
+    depends_on:
+      - dragonfly
+      - postgres
+
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: dragonfly
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonflydata:/data
+    networks:
+      - internal_network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - prisma:/var/lib/postgresql/data
+    networks:
+      - internal_network
+
+volumes:
+  dragonflydata:
+  prisma:
+    driver: local
+
+networks:
+  internal_network:
+    name: internal_network
